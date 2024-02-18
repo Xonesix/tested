@@ -9,6 +9,12 @@ const OPEN_API_KEY = process.env.OPEN_API_KEY;
 const openai = new OpenAI({ apiKey: OPEN_API_KEY });
 
 const app = express();
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
 const port = process.env.PORT || 3000;
 
 // Use bodyParser to parse JSON bodies
