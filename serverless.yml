@@ -1,0 +1,33 @@
+service: express-api-service
+
+provider:
+  name: aws
+  runtime: nodejs14.x # Adjust the runtime as necessary
+  region: us-west-2 # Specify your preferred AWS region
+  environment:
+    OPEN_API_KEY: ${env:OPEN_API_KEY} # Ensure this environment variable is set in your deployment environment
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "execute-api:Invoke"
+      Resource: "*"
+
+functions:
+  app:
+    handler: index.handler
+    events:
+      - http:
+          path: /
+          method: any
+          cors: true
+      - http:
+          path: '{proxy+}'
+          method: any
+          cors: true
+
+plugins:
+  - serverless-offline # For local development
+
+custom:
+  serverless-offline:
+    httpPort: 3000 # Default port for local development
