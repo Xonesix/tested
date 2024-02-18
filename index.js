@@ -19,7 +19,9 @@ const port = process.env.PORT || 3000;
 
 // Use bodyParser to parse JSON bodies
 app.use(bodyParser.json());
-const systemInstruction = "You are an assistant for diagnosing diseases/illnesses.\nRespond in this specific manner\nFirst give a list of likely diseases and explanations for why.\nThen Specifically add the token '|' (required) between and give a list of suggested medications if exist, if not, then don't type anything";
+const systemInstruction = "You are an assistant for diagnosing diseases/illnesses.\nRespond in this specific manner\nFirst give a list of likely diseases and explanations for why.\ned) then  give a list of suggested medications if exist, if not, then don't type anything.\n\nYour response should be in a perfect JSON format as follows (ALSO DO NOT PUT ANY NEW LINES: THIS SHOULD LIKE AN ACTUAL JSON){\{\"illnesses: [[illness1, explanation], [illness2], explanation] etc.,\"medications\": [[medication1, explanation], [medication2, explanation] etc.]}"
+
+
 
 // POST endpoint to receive userInput and respond with the AI's output
 app.post('/diagnose', async (req, res) => {
@@ -35,18 +37,17 @@ app.post('/diagnose', async (req, res) => {
     console.log("Calling OpenAI with userInput:", userInput);
     const completion = await openai.chat.completions.create({
       messages: [{ role: "system", content: systemInstruction }, { role: "user", content: userInput }],
-      model: "gpt-3.5-turbo",
+      model: "gpt-4",
     });
 
     console.log("OpenAI response received");
     const rawResponse = completion.choices[0].message.content;
-    const responseParts = rawResponse.split('|');
-    const jsonResponse = {
-      illness: responseParts[0].trim(),
-      medication: responseParts.length > 1 ? responseParts[1].trim() : ""
-    };
+    const jsonResponse = JSON.parse(rawResponse);
 
     res.json(jsonResponse);
+
+
+
   } catch (error) {
     console.error("Failed to call OpenAI:", error);
     res.status(500).send({ message: "Internal Server Error" });
